@@ -1,15 +1,9 @@
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.runners.Parameterized;
-
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
-
 import org.json.simple.parser.ParseException;
-import org.junit.Ignore;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
@@ -19,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -29,6 +22,7 @@ public class TestSuite {
 		private static ArrayList<String> messageIdList;
 		private static final String INVALID_USER_ID = "this_user_does_not_exist";
 		private static final String INVALID_MESSAGE_ID = "this_message_does_not_exist";
+		private static final String regexTime = "[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}Z";
 		
 		
 		//SETUP
@@ -222,7 +216,7 @@ public class TestSuite {
 		 * GET REQUESTS
 		 */
 				
-		//TEST: GET ALL EXISTING MESSAGES
+		//TEST: GET ALL EXISTING MESSAGES INDIVIDUALLY
 		@Order(2)
 		@TestFactory
 		Iterable<DynamicTest> getMessageTest() throws IOException, ParseException {
@@ -239,6 +233,26 @@ public class TestSuite {
 			}
 			return tests;
 		}
+		
+		//TEST: VERIFY TIME FORMAT OF ALL EXISTING MESSAGES
+		@Order(2)
+		@TestFactory
+		Iterable<DynamicTest> verifyMessageTimeFormat() throws IOException, ParseException {
+			
+			Collection<DynamicTest> tests = new ArrayList<DynamicTest>();
+			String allMessagesResponse = Requests.getMessage("");
+			
+			ArrayList<String> timeIdList = JSONUtils.getAllRecordsByKey(allMessagesResponse, "time");
+			
+			for (String id : timeIdList){
+				
+			    tests.add(DynamicTest.dynamicTest(
+			    		"Verify that each 'time' id matches the specified format", 
+			    		() -> assertEquals(true, id.matches(regexTime))));
+			}
+			return tests;
+		}
+		
 		
 		//TEST: VERIFY THAT A GET RETURNS ONLY ONE SINGLE MESSAGE AS EXPECTED
 		@Order(2)
