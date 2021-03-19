@@ -1,3 +1,4 @@
+package com.dylanbourke.perrytestsuite;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,7 +60,7 @@ public class Setup {
 	}
 	
 	public static void main(String[] args) throws Exception {                    
-	       JUnitCore.main("com.stackoverflow.MyTestSuite");
+	       JUnitCore.main("com.dylanbourke.perrytestsuite.TestSuite");
 	}
 	
 }
