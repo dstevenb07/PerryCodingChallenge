@@ -28,7 +28,6 @@ public class TestSuite {
 		//SETUP
 		@BeforeAll
 		static void init() throws IOException, ParseException {
-			//CHANGE TO DYNAMIC DIRECTORY
 			ArrayList<String> users = JSONUtils.returnJsonRecords(System.getProperty("user.dir")+"/src/users.json/");
 			userMap = Setup.populateDatabase(users);
 			messageIdList = new ArrayList<String>();
