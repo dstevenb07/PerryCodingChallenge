@@ -11,25 +11,36 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
+import org.junit.Rule;
+//import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.rules.ErrorCollector;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite.SuiteClasses;
+
+
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class TestSuite {
 		
+		@Rule
+		public ErrorCollector collector = new ErrorCollector();
+	
 		private static HashMap<String, String> userMap;
 		private static ArrayList<String> messageIdList;
 		private static final String INVALID_USER_ID = "this_user_does_not_exist";
 		private static final String INVALID_MESSAGE_ID = "this_message_does_not_exist";
 		private static final String regexTime = "[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}Z";
 		
+		//public TestSuite() {}
 		
 		//SETUP
 		@BeforeAll
-		static void init() throws IOException, ParseException {
+		public static void init() throws IOException, ParseException {
 			ArrayList<String> users = JSONUtils.returnJsonRecords(System.getProperty("user.dir")+"/src/users.json/");
 			userMap = Setup.populateDatabase(users);
 			messageIdList = new ArrayList<String>();
@@ -37,7 +48,7 @@ public class TestSuite {
 		
 		//TEARDOWN
 		@AfterAll
-		static void tearDown() throws IOException, ParseException {
+		public static void tearDown() throws IOException, ParseException {
 			Setup.deleteAllUsers();
 			Setup.deleteAllMessages();
 		}
@@ -62,7 +73,7 @@ public class TestSuite {
 		//TEST: SEND MESSAGES TO OTHER USERS
 		@Order(1)
 		@TestFactory
-		Iterable<DynamicTest> sendMessageToOtherUser() throws IOException, ParseException {
+		public Iterable<DynamicTest> sendMessageToOtherUser() throws IOException, ParseException {
 			String fromUser, toUser;
 			Collection<DynamicTest> tests = new ArrayList<DynamicTest>();
 			
@@ -95,7 +106,7 @@ public class TestSuite {
 		//TEST: SEND MESSAGE TO SELF
 		@Order(1)
 		@TestFactory
-		Iterable<DynamicTest> sendMessageToSelf() throws IOException, ParseException {
+		public Iterable<DynamicTest> sendMessageToSelf() throws IOException, ParseException {
 		    
 			Collection<DynamicTest> tests = new ArrayList<DynamicTest>();
 		    String user;
@@ -110,7 +121,8 @@ public class TestSuite {
 			    //add the created message to the list of messages for further tests
 			    messageIdList.add(JSONUtils.returnValueFromJSON(response, "id"));
 			    
-			    tests.add(DynamicTest.dynamicTest("Verify that creating a message with the same to and from userId returns a 200", () -> assertFalse(response==null)));
+			    tests.add(DynamicTest.dynamicTest("Verify that creating a message with the same to and from userId returns a 200", 
+			    		() -> assertFalse(response==null)));
 			}
 			return tests;
 		}
@@ -118,7 +130,7 @@ public class TestSuite {
 		//TEST: SEND MESSAGE TO INVALID 'TO' USER
 		@Order(1)
 		@TestFactory
-		Iterable<DynamicTest> sendMessageInvalidTo() throws IOException, ParseException {
+		public Iterable<DynamicTest> sendMessageInvalidTo() throws IOException, ParseException {
 			Collection<DynamicTest> tests = new ArrayList<DynamicTest>();
 			String user;
 			for (HashMap.Entry<String, String> item : this.userMap.entrySet()) {
@@ -133,7 +145,7 @@ public class TestSuite {
 		//TEST: SEND MESSAGE TO INVALID 'FROM' USER
 		@Order(1)
 		@TestFactory
-		Iterable<DynamicTest> sendMessageInvalidFrom() throws IOException, ParseException {
+		public Iterable<DynamicTest> sendMessageInvalidFrom() throws IOException, ParseException {
 			Collection<DynamicTest> tests = new ArrayList<DynamicTest>();
 			String user;
 			for (HashMap.Entry<String, String> item : this.userMap.entrySet()) {
@@ -147,12 +159,14 @@ public class TestSuite {
 		}
 		
 		
-		//TEST: SEND MESSAGE TO AND FROM INVALID USER
+		//TEST: SEND MESSAGE FROM AND TO INVALID USER
 		@Order(1)
 		@Test
-		void sendMessageInvalidFromAndTo() throws IOException, ParseException {
+		public void sendMessageInvalidFromAndTo() throws IOException, ParseException {
 			    boolean response = Requests.createMessageBoolReturn(JSONUtils.createMessageObject(INVALID_USER_ID, INVALID_USER_ID, "Test message"));
 			    assertFalse(response);
+			    
+			    
 		}
 				
 		
@@ -160,7 +174,7 @@ public class TestSuite {
 		//TEST: SEND MESSAGES WITH CHINESE CHARACTERS (from each user to each other user incl. themselves)
 		@Order(1)
 		@TestFactory
-		Iterable<DynamicTest> sendMessageWithChineseChars() throws IOException, ParseException {
+		public Iterable<DynamicTest> sendMessageWithChineseChars() throws IOException, ParseException {
 			String fromUser, toUser;
 			Collection<DynamicTest> tests = new ArrayList<DynamicTest>();
 			
@@ -188,7 +202,7 @@ public class TestSuite {
 		@Order(1)
 		@ParameterizedTest
 		@ValueSource(strings = { "", "!\\#$%&'()*+,-./", "∀∁∂∃∄∅∆∇∈∉∊∋∌∍∎∏∐∑", "ĀāĂăĄą" })
-		void sendMessageWithSpecialContent(String content) throws IOException, ParseException {
+		public void sendMessageWithSpecialContent(String content) throws IOException, ParseException {
 			
 			
 			ArrayList<String> userArray = new ArrayList<String>(userMap.values());
@@ -220,7 +234,7 @@ public class TestSuite {
 		//TEST: GET ALL EXISTING MESSAGES INDIVIDUALLY
 		@Order(2)
 		@TestFactory
-		Iterable<DynamicTest> getMessageTest() throws IOException, ParseException {
+		public Iterable<DynamicTest> getMessageTest() throws IOException, ParseException {
 			
 			Collection<DynamicTest> tests = new ArrayList<DynamicTest>();
 			String allMessagesResponse = Requests.getMessage("");
@@ -238,7 +252,7 @@ public class TestSuite {
 		//TEST: VERIFY TIME FORMAT OF ALL EXISTING MESSAGES
 		@Order(2)
 		@TestFactory
-		Iterable<DynamicTest> verifyMessageTimeFormat() throws IOException, ParseException {
+		public Iterable<DynamicTest> verifyMessageTimeFormat() throws IOException, ParseException {
 			
 			Collection<DynamicTest> tests = new ArrayList<DynamicTest>();
 			String allMessagesResponse = Requests.getMessage("");
@@ -258,7 +272,7 @@ public class TestSuite {
 		//TEST: VERIFY THAT A GET RETURNS ONLY ONE SINGLE MESSAGE AS EXPECTED
 		@Order(2)
 		@TestFactory
-		Iterable<DynamicTest> getMessageQuantityTest() throws IOException, ParseException {
+		public Iterable<DynamicTest> getMessageQuantityTest() throws IOException, ParseException {
 			
 			Collection<DynamicTest> tests = new ArrayList<DynamicTest>();
 			for (String id : messageIdList){
@@ -277,7 +291,7 @@ public class TestSuite {
 		//TEST: SEND GETMESSAGE WITH BLANK ID PARAMETER
 		@Order(2)
 		@Test
-		void getMessageWithNoParam() throws IOException, ParseException {
+		public void getMessageWithNoParam() throws IOException, ParseException {
 			boolean response = Requests.sendGETBoolReturn(Requests.MESSAGE_URL, "");
 			
 			//the GET is expected to return all messages :: expected response is true (200 response code)
@@ -287,7 +301,7 @@ public class TestSuite {
 		//TEST: SEND GETMESSAGE WITH INVALID ID PARAMETER
 		@Order(2)
 		@Test
-		void getInvalidMessage() throws IOException, ParseException {
+		public void getInvalidMessage() throws IOException, ParseException {
 			boolean response = Requests.sendGETBoolReturn(Requests.MESSAGE_URL, INVALID_MESSAGE_ID);
 			
 			//expect that response == false :: Request should not return a 200
@@ -318,7 +332,7 @@ public class TestSuite {
 		//TEST: LIST EXISTING MESSAGES BETWEEN EXISTING USERS
 		@Order(2)
 		@TestFactory
-		Iterable<DynamicTest> listValidMessagesTest() throws IOException, ParseException {
+		public Iterable<DynamicTest> listValidMessagesTest() throws IOException, ParseException {
 			
 			String fromUser, toUser;
 			Collection<DynamicTest> tests = new ArrayList<DynamicTest>();
@@ -345,7 +359,7 @@ public class TestSuite {
 		//TEST: LIST EXISTING MESSAGES BETWEEN NON-EXISTENT USERS
 		@Order(2)
 		@Test
-		void listExistingMessagesBetweenNonExistentUsers() throws IOException {
+		public void listExistingMessagesBetweenNonExistentUsers() throws IOException {
 			boolean result = Requests.listMessagesBoolReturn(INVALID_USER_ID, INVALID_USER_ID);
 			assertTrue(result);
 		}
@@ -375,7 +389,7 @@ public class TestSuite {
 		//TEST: LIST MESSAGES WITH BLANK TO USER
 		@Order(2)
 		@TestFactory
-		Iterable<DynamicTest> listMessagesWithBlankToParameter() throws IOException, ParseException {
+		public Iterable<DynamicTest> listMessagesWithBlankToParameter() throws IOException, ParseException {
 			
 			String fromUser;
 			Collection<DynamicTest> tests = new ArrayList<DynamicTest>();
@@ -396,7 +410,7 @@ public class TestSuite {
 		//TEST: LIST MESSAGES WITH BLANK PARAMETERS
 		@Order(2)
 		@Test
-		void listMessagesWithBlankParameters() throws IOException {
+		public void listMessagesWithBlankParameters() throws IOException {
 			boolean result = Requests.listMessagesBoolReturn("", "");
 			
 			//expected: all messages are returned (list is a GET requests, hence result should be
@@ -409,7 +423,7 @@ public class TestSuite {
 		//TEST: LIST MESSAGES FOR VALID USERID WHERE FROMUSER == TOUSER
 		@Order(2)
 		@TestFactory
-		Iterable<DynamicTest> listMessagesBetweenValidUserAndThemselves() throws IOException, ParseException {
+		public Iterable<DynamicTest> listMessagesBetweenValidUserAndThemselves() throws IOException, ParseException {
 			
 			String user;
 			Collection<DynamicTest> tests = new ArrayList<DynamicTest>();
@@ -444,7 +458,7 @@ public class TestSuite {
 		//TEST: DELETE MESSAGE WITH INVALID ID
 		@Order(3)
 		@Test
-		void deleteInvalidMessageId() throws IOException, ParseException {
+		public void deleteInvalidMessageId() throws IOException, ParseException {
 			
 			boolean result = Requests.sendDELETEBoolReturn(Requests.MESSAGE_URL, INVALID_MESSAGE_ID);
 			assertFalse(result);
@@ -470,7 +484,7 @@ public class TestSuite {
 		//TEST: DELETE MESSAGE WITH BLANK PARAMETER
 		@Order(5)
 		@Test
-		void deleteWithBlankMessageId() throws IOException, ParseException {
+		public void deleteWithBlankMessageId() throws IOException, ParseException {
 			boolean result = Requests.sendDELETEBoolReturn(Requests.MESSAGE_URL, "");
 			assertFalse(result);
 		}
@@ -521,7 +535,7 @@ public class TestSuite {
 		//this test will first fill the Database with a message to and from each user
 		@Order(7)
 		@TestFactory
-		Iterable<DynamicTest> verifyCountOfListMessagesResponse() throws IOException, ParseException {
+		public Iterable<DynamicTest> verifyCountOfListMessagesResponse() throws IOException, ParseException {
 			String fromUser, toUser;
 			Collection<DynamicTest> tests = new ArrayList<DynamicTest>();
 			
@@ -559,7 +573,7 @@ public class TestSuite {
 		//this test first deletes all users from the Database, then lists the possibly orphan messages
 		@Order(8)
 		@TestFactory
-		Iterable<DynamicTest> listValidMessagesOfDeletedUsers() throws IOException, ParseException {
+		public Iterable<DynamicTest> listValidMessagesOfDeletedUsers() throws IOException, ParseException {
 			String fromUser, toUser;
 			Collection<DynamicTest> tests = new ArrayList<DynamicTest>();
 			

@@ -40,10 +40,10 @@ public class Requests {
 			}
 			in.close();
 
-			//System.out.println("GET request successful\n");
+			System.out.println("GET request successful\n");
 			return response.toString();
 		} else {
-			//System.out.println("GET request failed\n");
+			System.out.println("GET request failed\n");
 			return null;
 		}
 
@@ -112,7 +112,7 @@ public class Requests {
         
 
 		int responseCode = con.getResponseCode();
-		//System.out.println("DELETE Response Code :: " + responseCode);
+		System.out.println("DELETE Response Code :: " + responseCode);
 
 		if (responseCode == HttpURLConnection.HTTP_OK) { //success
 				BufferedReader in = new BufferedReader(new InputStreamReader(

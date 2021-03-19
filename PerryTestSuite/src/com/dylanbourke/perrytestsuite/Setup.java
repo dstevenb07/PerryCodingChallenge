@@ -5,6 +5,8 @@ import java.util.HashMap;
 
 import org.json.simple.parser.ParseException;
 import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
+import org.junit.runner.notification.Failure;
 
 public class Setup {
 	
@@ -59,9 +61,14 @@ public class Setup {
 		}
 	}
 	
-	public static void main(String[] args) throws Exception {                    
-	       JUnitCore.main("com.dylanbourke.perrytestsuite.TestSuite");
+	/*
+	public static void main(String[] args) {
+        Result result = JUnitCore.runClasses(TestSuite.class);
+        for (Failure failure : result.getFailures()) {
+            System.out.println(failure.toString());
+        }
 	}
+	*/
 	
 }
 	
