@@ -33,10 +33,10 @@ public class TestRunner {
         System.out.println("Running Junit Test Suite.");
         Result result = JUnitCore.runClasses(TestSuite.class);
         for (Failure failure : result.getFailures()) {
-            System.out.println(failure.toString());
+            System.out.println(failure.toString()+"\n");
         }
         System.out.println("Successful: " + result.wasSuccessful() +
-            " ran " + result.getRunCount() + " tests");
+            " ran " + result.getRunCount() + " tests\n");
         
 		//print out successes & failures
 		
