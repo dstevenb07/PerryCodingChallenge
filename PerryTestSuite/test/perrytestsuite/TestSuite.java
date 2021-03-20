@@ -1,6 +1,7 @@
 package perrytestsuite;
 
-import static org.junit.jupiter.api.Assertions.*;
+//import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,13 +12,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
-import org.junit.Rule;
 //import org.junit.jupiter.api.Test;
 import org.junit.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.platform.runner.JUnitPlatform;
 import org.junit.rules.ErrorCollector;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
@@ -26,21 +27,16 @@ import perrytestsuite.JSONUtils;
 import perrytestsuite.Requests;
 import perrytestsuite.Setup;
 
-
-
+@SuppressWarnings("unchecked")
+@RunWith(JUnitPlatform.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class TestSuite {
-		
-		@Rule
-		public ErrorCollector collector = new ErrorCollector();
 	
 		private static HashMap<String, String> userMap;
 		private static ArrayList<String> messageIdList;
 		private static final String INVALID_USER_ID = "this_user_does_not_exist";
 		private static final String INVALID_MESSAGE_ID = "this_message_does_not_exist";
 		private static final String regexTime = "[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}Z";
-		
-		//public TestSuite() {}
 		
 		//SETUP
 		@BeforeAll
@@ -354,7 +350,8 @@ public class TestSuite {
 				    //returns false if the response code != 200
 				    boolean result = Requests.listMessagesBoolReturn(fromUser, toUser);
 				    
-			    tests.add(DynamicTest.dynamicTest("Verify that listing messages between two existing users returns a 200", () -> assertTrue(result)));
+			    tests.add(DynamicTest.dynamicTest("Verify that listing messages between two existing users returns a 200",
+			    		() -> assertTrue(result)));
 			    }
 			}
 			return tests;
