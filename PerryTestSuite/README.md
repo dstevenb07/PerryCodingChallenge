@@ -7,7 +7,9 @@ https://perrys-summer-vacation.herokuapp.com/api/messages/
 
 ## How To Run PerryTestSuite
 Simply run .../PerryTestSuite/test/TestSuite.java as a JUnit test.
-
+     - Alternatively, it is possible to run the tests through the command
+       line by running 'execute_test.bat', although it is recommended
+       to run through JUnit 5.
 
 ## Brief Test Coverage Overview
 The API's four method types were tested as follows:
